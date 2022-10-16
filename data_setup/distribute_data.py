@@ -12,7 +12,7 @@ def pca_D_reduction(X, dim):
     pca = PCA(n_components=dim)
     return pca.fit_transform(X)
 
-def preprocess(X, img_size, device, dim=500):
+def preprocess(X, img_size, device):
     scattering = Scattering2D(J=3, shape=img_size).to(device)
     X = X.to(device)
     X = scattering(X)
@@ -30,7 +30,7 @@ def distribute_syn(NUM_client, AMB_D, SUB_D, NUM_sub, NUM_pts_sub, range_LocalK,
     l_basis = generate_subspaces(AMB_D, SUB_D, NUM_sub)
     labels = np.array(range(NUM_sub))
     L=[]
-    L_num_clusters = []
+    # L_num_clusters = []
     for client_i in range(NUM_client):
         device_d = {}
         num_sub = np.random.randint(*range_LocalK)
@@ -42,8 +42,8 @@ def distribute_syn(NUM_client, AMB_D, SUB_D, NUM_sub, NUM_pts_sub, range_LocalK,
         device_d['data'] = client_data
         device_d['label'] = client_lab
         L.append(device_d)
-        L_num_clusters.append(num_sub)
-    return L, L_num_clusters
+        # L_num_clusters.append(num_sub)
+    return L
         
 def get_loaders(datas, batchs, set_labs):
     L = []
@@ -58,7 +58,7 @@ def get_loaders(datas, batchs, set_labs):
     return L 
 
 
-def get_imgs(L_loaders, set_labs, img_size, device, dim=500):
+def get_imgs(L_loaders, set_labs, img_size, device):
     L_labs = []
     L_data = []
     for loader in L_loaders:
@@ -67,7 +67,7 @@ def get_imgs(L_loaders, set_labs, img_size, device, dim=500):
         L_labs.append(labels)
     data = torch.cat(L_data, 0)
     labels = torch.cat(L_labs, 0).numpy()
-    precossed_data = preprocess(data, img_size, device, dim=dim)
+    precossed_data = preprocess(data, img_size, device)
     L = []
     for lab in set_labs:
         indices = labels == lab
@@ -77,7 +77,7 @@ def get_imgs(L_loaders, set_labs, img_size, device, dim=500):
     return L
 
     
-def distribute_real(name, NUM_client, NUM_pts_sub, range_LocalK, device, img_size=(32,32), dim=500, is_con=True):
+def distribute_real(name, NUM_client, NUM_pts_sub, range_LocalK, device, img_size=(32,32), is_con=True):
     datas = getdata(name, resize=img_size, train=True)
     set_labs = list(set(datas.targets)) if isinstance(datas.targets, list) else list(set(datas.targets.tolist()))
     L_loaders = get_loaders(datas, NUM_pts_sub, set_labs)
@@ -109,13 +109,13 @@ def distribute_real(name, NUM_client, NUM_pts_sub, range_LocalK, device, img_siz
         if is_con:
             device_d['data'] = con_process(torch.cat(device_d['data'], dim=0))
         else:
-            device_d['data'] = preprocess(torch.cat(device_d['data'], dim=0),img_size, device, dim=dim)
+            device_d['data'] = preprocess(torch.cat(device_d['data'], dim=0),img_size, device)
         # device_d['data'] = torch.cat(device_d['data'], dim=0)
         device_d['label'] = torch.cat(device_d['label'], dim=0).numpy()
         L.append(device_d)
     return L
 
-def distribute_real_cattering(name, NUM_client, NUM_pts_sub, range_LocalK, device, img_size=(32, 32), dim=500):
+def distribute_real_cattering(name, NUM_client, NUM_pts_sub, range_LocalK, device, img_size=(32, 32)):
     datas = getdata(name, resize=img_size, train=True)
     set_labs = list(set(datas.targets)) if isinstance(datas.targets, list) else list(set(datas.targets.tolist()))
     L_num_sub = [np.random.randint(*range_LocalK) for i in range(NUM_client)]
@@ -127,7 +127,7 @@ def distribute_real_cattering(name, NUM_client, NUM_pts_sub, range_LocalK, devic
     batch_sizes = NUM_pts_sub*batch_sizes
             
     L_loaders = get_loaders(datas, batch_sizes, set_labs)
-    L_imgs = get_imgs(L_loaders, set_labs, img_size, device=device, dim=dim)
+    L_imgs = get_imgs(L_loaders, set_labs, img_size, device=device)
     L_pos = [0 for i in range(len(set_labs))]
     L = []
     for client_i in range(NUM_client):

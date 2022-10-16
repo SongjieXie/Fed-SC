@@ -33,7 +33,7 @@ class BaseSC:
     Attributes:
     ------------
     """
-    def __init__(self, n_cluster=None, maximal_comps=10, n_init=20, kmeans_alg='kmeans++'):
+    def __init__(self, n_cluster=None, maximal_comps=10, n_init=20, kmeans_alg='k-means++'):
         self.n_cluster = n_cluster
         self.n_init = n_init
         self.kmeans_alg = kmeans_alg

@@ -82,3 +82,5 @@ python demo.py -d EMNIST --method FedSC-SSC --localK 8 --fixed_dim 1 --num_subsp
 ```shell
 python demo.py -d COIL100 --method FedSC-SSC --localK 8 --fixed_dim 1 --num_subspaces 100
 ```
+
+## Update

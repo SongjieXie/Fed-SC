@@ -33,7 +33,7 @@ class BaseSC:
     Attributes:
     ------------
     """
-    def __init__(self, n_cluster=None, maximal_comps=10, n_init=20, kmeans_alg='k-means++'):
+    def __init__(self, n_cluster=None, maximal_comps=60, n_init=20, kmeans_alg='k-means++'):
         self.n_cluster = n_cluster
         self.n_init = n_init
         self.kmeans_alg = kmeans_alg
@@ -88,9 +88,9 @@ class BaseSC:
             
         self.svd.fit(self.W)
         d = np.diff(self.svd.singular_values_)
-        # print()
+        print()
+        print(len(self.svd.singular_values_))
         r = np.argmin(d)+1
-        # print(r)
         return r
     
     def spectral_clustering(self):
@@ -140,8 +140,8 @@ class SSC(BaseSC):
         gamma (float. default: 500):
             lam = max_{j\not i}||x_j^Tx_i||_2/gamma.
     """
-    def __init__(self, n_cluster=None, n_init=20, is_noisy=True, gamma= 500):
-        super().__init__(n_cluster, n_init)
+    def __init__(self, n_cluster=None, maximal_comps=60, n_init=20, kmeans_alg='k-means++', is_noisy=True, gamma= 500):
+        super().__init__(n_cluster, maximal_comps, n_init, kmeans_alg)
         self.is_noisy = is_noisy
         self.gamma = gamma
         
@@ -204,8 +204,8 @@ class TSC(BaseSC):
     Args:
         BaseSC (_type_): _description_
     """
-    def __init__(self, n_cluster=None, n_init=20, q=10):
-        super().__init__(n_cluster, n_init)
+    def __init__(self, n_cluster=None, maximal_comps=60, n_init=20, kmeans_alg='k-means++', q=10):
+        super().__init__(n_cluster, maximal_comps, n_init, kmeans_alg)
         self.q = q
         
     def _TSC(self, X):
